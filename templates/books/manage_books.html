@@ -1,0 +1,615 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Books - SmartLibrary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    {% include 'includes/enhanced_nav_styles.html' %}
+    {% include 'includes/responsive_tables_styles.html' %}
+    <style>
+        :root {
+            --primary-green: #10b981; --primary-blue: #0ea5e9; --primary-purple: #8b5cf6;
+            --text-primary: #1f2937; --text-secondary: #6b7280; --text-muted: #9ca3af;
+            --bg-white: #ffffff; --bg-gray: #f9fafb; --bg-light: #f3f4f6; --border-color: #e5e7eb;
+            --shadow-sm: 0 1px 2px 0 rgba(0,0,0,0.05); --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --radius-md: 0.5rem; --radius-lg: 0.75rem; --radius-xl: 1rem;
+            --error: #ef4444; --warning: #f59e0b; --success: #10b981;
+        }
+        [data-theme="dark"] {
+            --text-primary: #f9fafb; --text-secondary: #d1d5db; --text-muted: #9ca3af;
+            --bg-white: #1f2937; --bg-gray: #111827; --bg-light: #374151; --border-color: #374151;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-gray); color: var(--text-primary); min-height: 100vh; }
+        .main-container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+        /* Header */
+        .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; gap: 1rem; flex-wrap: wrap; }
+        .breadcrumb { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .breadcrumb a { color: var(--text-secondary); text-decoration: none; }
+        .breadcrumb a:hover { color: var(--primary-green); }
+        .breadcrumb svg { width: 16px; height: 16px; }
+        .page-title { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.375rem; }
+        .page-title svg { width: 28px; height: 28px; color: var(--primary-purple); }
+        .page-title h1 { font-size: 1.875rem; font-weight: 800; background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .page-subtitle { color: var(--text-secondary); font-size: 0.9375rem; }
+        .header-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-start; }
+
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 1.25rem; font-family: 'Inter', sans-serif; font-size: 0.875rem; font-weight: 600; border-radius: var(--radius-md); border: none; cursor: pointer; transition: all 0.2s; text-decoration: none; white-space: nowrap; }
+        .btn svg { width: 16px; height: 16px; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary-green), var(--primary-blue)); color: white; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-purple { background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue)); color: white; }
+        .btn-purple:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-warning:hover { background: #d97706; }
+        .btn-outline { background: transparent; color: var(--text-secondary); border: 2px solid var(--border-color); }
+        .btn-outline:hover { border-color: var(--primary-green); color: var(--primary-green); }
+        .btn-ghost { background: var(--bg-light); color: var(--text-secondary); border: 1px solid var(--border-color); }
+        .btn-ghost:hover { background: var(--border-color); }
+        .btn-sm { padding: 0.4rem 0.875rem; font-size: 0.8125rem; }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.25rem; display: flex; align-items: center; gap: 0.875rem; box-shadow: var(--shadow-sm); transition: all 0.2s; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .stat-icon { width: 46px; height: 46px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .stat-icon svg { width: 22px; height: 22px; }
+        .stat-icon.purple { background: rgba(139,92,246,0.1); color: var(--primary-purple); }
+        .stat-icon.blue { background: rgba(14,165,233,0.1); color: var(--primary-blue); }
+        .stat-icon.green { background: rgba(16,185,129,0.1); color: var(--success); }
+        .stat-icon.red { background: rgba(239,68,68,0.1); color: var(--error); }
+        .stat-icon.orange { background: rgba(245,158,11,0.1); color: var(--warning); }
+        .stat-value { font-size: 1.625rem; font-weight: 800; line-height: 1; margin-bottom: 0.2rem; }
+        .stat-label { font-size: 0.8125rem; color: var(--text-secondary); font-weight: 500; }
+
+        /* Filter bar */
+        .filter-bar { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.125rem 1.5rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); }
+        .filter-form { display: flex; gap: 0.875rem; align-items: flex-end; flex-wrap: wrap; }
+        .filter-group { display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 150px; }
+        .filter-label { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+        .filter-input, .filter-select { padding: 0.625rem 0.875rem; font-family: 'Inter', sans-serif; font-size: 0.875rem; color: var(--text-primary); background: var(--bg-gray); border: 2px solid var(--border-color); border-radius: var(--radius-md); transition: all 0.2s; }
+        .filter-input:focus, .filter-select:focus { outline: none; border-color: var(--primary-green); background: var(--bg-white); }
+        .search-wrapper { position: relative; flex: 2; min-width: 200px; }
+        .search-wrapper svg { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: var(--text-muted); pointer-events: none; }
+        .search-wrapper .filter-input { padding-left: 2.5rem; width: 100%; }
+
+        /* Table container */
+        .table-container { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); overflow: hidden; }
+        .table-header { display: flex; align-items: center; justify-content: space-between; padding: 1.125rem 1.5rem; border-bottom: 1px solid var(--border-color); flex-wrap: wrap; gap: 0.75rem; }
+        .table-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 0.625rem; }
+        .count-badge { display: inline-flex; align-items: center; padding: 0.2rem 0.625rem; font-size: 0.8125rem; font-weight: 700; background: rgba(139,92,246,0.1); color: var(--primary-purple); border-radius: 9999px; }
+
+        /* Books table */
+        .books-table { width: 100%; border-collapse: collapse; }
+        .books-table thead { background: var(--bg-light); border-bottom: 2px solid var(--border-color); }
+        .books-table th { padding: 0.75rem 1rem; font-size: 0.8125rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); text-align: left; white-space: nowrap; }
+        .books-table tbody tr { border-bottom: 1px solid var(--border-color); transition: background 0.15s; }
+        .books-table tbody tr:last-child { border-bottom: none; }
+        .books-table tbody tr:hover { background: var(--bg-gray); }
+        .books-table td { padding: 0.875rem 1rem; font-size: 0.9375rem; vertical-align: middle; }
+        .books-table th:first-child, .books-table td:first-child { width: 40px; padding-left: 1.25rem; }
+
+        /* Book cell */
+        .book-cell { display: flex; align-items: center; gap: 0.75rem; }
+        .book-cover { width: 38px; height: 50px; border-radius: 4px; object-fit: cover; background: var(--bg-light); flex-shrink: 0; }
+        .book-cover-placeholder { width: 38px; height: 50px; border-radius: 4px; background: linear-gradient(135deg, var(--primary-purple), var(--primary-blue)); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .book-cover-placeholder svg { width: 18px; height: 18px; color: white; }
+        .book-title { font-weight: 600; color: var(--text-primary); font-size: 0.9375rem; line-height: 1.3; }
+        .book-author { font-size: 0.8125rem; color: var(--text-muted); margin-top: 0.125rem; }
+        .book-isbn { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; }
+
+        /* Stock badge */
+        .stock-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.625rem; font-size: 0.8125rem; font-weight: 700; border-radius: 9999px; }
+        .stock-ok { background: rgba(16,185,129,0.1); color: var(--success); }
+        .stock-low { background: rgba(245,158,11,0.1); color: var(--warning); }
+        .stock-out { background: rgba(239,68,68,0.1); color: var(--error); }
+
+        /* Checkbox */
+        .row-cb { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary-purple); }
+        .select-all-cb { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary-purple); }
+
+        /* Inline stock form */
+        .stock-form { display: flex; align-items: center; gap: 0.375rem; }
+        .stock-input { width: 56px; padding: 0.3rem 0.5rem; font-size: 0.8125rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-gray); color: var(--text-primary); text-align: center; }
+        .stock-input:focus { outline: none; border-color: var(--primary-green); }
+
+        /* Batch action bar */
+        .batch-bar { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--bg-white); border: 1px solid var(--border-color); border-radius: var(--radius-xl); box-shadow: 0 10px 40px rgba(0,0,0,0.15); padding: 0.875rem 1.5rem; display: none; align-items: center; gap: 1rem; z-index: 1000; flex-wrap: wrap; }
+        .batch-bar.show { display: flex; }
+        .batch-label { font-size: 0.9375rem; font-weight: 600; color: var(--text-primary); white-space: nowrap; }
+        .batch-amount-input { width: 64px; padding: 0.4rem 0.5rem; font-size: 0.875rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-gray); color: var(--text-primary); text-align: center; }
+        .batch-amount-input:focus { outline: none; border-color: var(--primary-green); }
+
+        /* Pagination */
+        .pagination-wrapper { display: flex; justify-content: center; padding: 1.25rem; border-top: 1px solid var(--border-color); }
+        .pagination { display: flex; gap: 0.375rem; }
+        .page-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); background: var(--bg-white); border: 1px solid var(--border-color); border-radius: var(--radius-md); text-decoration: none; transition: all 0.2s; }
+        .page-btn:hover { border-color: var(--primary-purple); color: var(--primary-purple); }
+        .page-btn.active { background: var(--primary-purple); color: white; border-color: var(--primary-purple); }
+        .page-btn svg { width: 16px; height: 16px; }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 4rem 2rem; }
+        .empty-state svg { width: 56px; height: 56px; color: var(--text-muted); opacity: 0.35; margin-bottom: 1rem; }
+        .empty-state h4 { font-size: 1.125rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 0.5rem; }
+        .empty-state p { color: var(--text-muted); }
+
+        /* Delete modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: var(--bg-white); border-radius: var(--radius-xl); padding: 2rem; max-width: 480px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .modal-title { font-size: 1.125rem; font-weight: 700; color: var(--error); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.625rem; }
+        .modal-title svg { width: 22px; height: 22px; }
+        .modal-body { font-size: 0.9375rem; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+        .modal-footer { display: flex; gap: 0.75rem; justify-content: flex-end; }
+
+        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } .page-header { flex-direction: column; } .filter-form { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    {% include 'includes/toast_notifications.html' %}
+    {% include 'includes/enhanced_nav.html' %}
+    {% if messages %}{% for message in messages %}
+    <div class="django-message-data" data-message="{{ message }}" data-tags="{{ message.tags }}" style="display:none;"></div>
+    {% endfor %}{% endif %}
+
+    <div class="main-container">
+
+               <!-- Header -->
+        <div class="page-header">
+            <div>
+                <div class="breadcrumb">
+                    <a href="{% url 'dashboard:home' %}">Dashboard</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg>
+                    <a href="{% url 'dashboard:admin' %}">Admin</a>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg>
+                    <span>Manage Books</span>
+                </div>
+                <div class="page-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    <h1>Manage Books</h1>
+                </div>
+                <p class="page-subtitle">Edit, delete, manage stock and bulk import books — Admin only</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'dashboard:admin' %}" class="btn btn-outline btn-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+                    Back
+                </a>
+                <a href="{% url 'books:bulk_import' %}" class="btn btn-ghost btn-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    Bulk Import
+                </a>
+                <a href="{% url 'books:export_csv' %}" class="btn btn-ghost btn-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    Export CSV
+                </a>
+                <a href="{% url 'books:create' %}" class="btn btn-purple">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Add Book
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon purple">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                </div>
+                <div>
+                    <div class="stat-value" style="color:var(--primary-purple);">{{ stats.total|default:0 }}</div>
+                    <div class="stat-label">Total Books</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon blue">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                </div>
+                <div>
+                    <div class="stat-value" style="color:var(--primary-blue);">{{ stats.total_copies|default:0 }}</div>
+                    <div class="stat-label">Total Copies</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon green">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                </div>
+                <div>
+                    <div class="stat-value" style="color:var(--success);">{{ stats.available|default:0 }}</div>
+                    <div class="stat-label">Available</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon orange">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
+                <div>
+                    <div class="stat-value" style="color:var(--warning);">{{ low_stock }}</div>
+                    <div class="stat-label">Low Stock (≤2)</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon red">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                </div>
+                <div>
+                    <div class="stat-value" style="color:var(--error);">{{ out_of_stock }}</div>
+                    <div class="stat-label">Out of Stock</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <form method="get" class="filter-form">
+                <div class="search-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" name="search" class="filter-input" placeholder="Search title, author, ISBN..." value="{{ search }}">
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Category</label>
+                    <select name="category" class="filter-select">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if category_filter == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">Availability</label>
+                    <select name="availability" class="filter-select">
+                        <option value="">All</option>
+                        <option value="available" {% if availability_filter == 'available' %}selected{% endif %}>Available</option>
+                        <option value="low" {% if availability_filter == 'low' %}selected{% endif %}>Low Stock</option>
+                        <option value="unavailable" {% if availability_filter == 'unavailable' %}selected{% endif %}>Out of Stock</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:0.5rem;align-items:flex-end;">
+                    <button type="submit" class="btn btn-purple btn-sm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                        Filter
+                    </button>
+                    {% if search or category_filter or availability_filter %}
+                    <a href="{% url 'books:manage' %}" class="btn btn-ghost btn-sm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        Clear
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <div class="table-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--primary-purple);"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    Books
+                    <span class="count-badge">{{ total_count }}</span>
+                </div>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="toggleSelectAll()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        Select All
+                    </button>
+                </div>
+            </div>
+
+            {% if books %}
+            <div class="responsive-table-wrapper">
+                <table class="books-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="select-all-cb" id="selectAllCb" onchange="onSelectAllChange(this)"></th>
+                            <th>Book</th>
+                            <th>Category</th>
+                            <th>Copies</th>
+                            <th>Available</th>
+                            <th>Status</th>
+                            <th>Adjust Stock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in books %}
+                        <tr>
+                            <td><input type="checkbox" class="row-cb" value="{{ book.id }}" onchange="onRowCheck()"></td>
+                            <td>
+                                <div class="book-cell">
+                                    {% if book.cover_image %}
+                                    <img src="{{ book.cover_image.url }}" alt="{{ book.title }}" class="book-cover">
+                                    {% else %}
+                                    <div class="book-cover-placeholder">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="book-title">{{ book.title|truncatewords:6 }}</div>
+                                        <div class="book-author">{{ book.author|truncatewords:4 }}</div>
+                                        <div class="book-isbn">{{ book.isbn }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="font-size:0.875rem;color:var(--text-secondary);">{{ book.category.name|default:"—" }}</td>
+                            <td style="font-weight:600;text-align:center;">{{ book.total_copies }}</td>
+                            <td style="font-weight:700;text-align:center;color:{% if book.available_copies == 0 %}var(--error){% elif book.available_copies <= 2 %}var(--warning){% else %}var(--success){% endif %};">{{ book.available_copies }}</td>
+                            <td>
+                                {% if book.available_copies == 0 %}
+                                <span class="stock-badge stock-out">Out of Stock</span>
+                                {% elif book.available_copies <= 2 %}
+                                <span class="stock-badge stock-low">Low Stock</span>
+                                {% else %}
+                                <span class="stock-badge stock-ok">Available</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST" action="{% url 'books:manage' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}" class="stock-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="update_stock">
+                                    <input type="hidden" name="book_id" value="{{ book.id }}">
+                                    <input type="number" name="amount" value="1" min="1" max="100" class="stock-input">
+                                    <button type="submit" name="stock_action" value="add" class="btn btn-sm" style="background:rgba(16,185,129,0.1);color:var(--success);border:1px solid rgba(16,185,129,0.3);padding:0.3rem 0.5rem;" title="Add copies">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                    </button>
+                                    <button type="submit" name="stock_action" value="remove" class="btn btn-sm" style="background:rgba(239,68,68,0.1);color:var(--error);border:1px solid rgba(239,68,68,0.3);padding:0.3rem 0.5rem;" title="Remove copies">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:0.375rem;">
+                                    <a href="{% url 'books:detail' book.pk %}" class="btn btn-ghost btn-sm" title="View">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                    </a>
+                                    <a href="{% url 'books:edit' book.pk %}" class="btn btn-sm" style="background:rgba(139,92,246,0.1);color:var(--primary-purple);border:1px solid rgba(139,92,246,0.3);" title="Edit">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </a>
+                                    <button type="button" class="btn btn-sm" style="background:rgba(239,68,68,0.1);color:var(--error);border:1px solid rgba(239,68,68,0.3);" title="Delete"
+                                        onclick="openDeleteModal({{ book.id }}, '{{ book.title|escapejs }}')">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if page_obj.has_other_pages %}
+            <div class="pagination-wrapper">
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}&search={{ search }}&category={{ category_filter }}&availability={{ availability_filter }}" class="page-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"></path></svg>
+                    </a>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    <a href="?page={{ num }}&search={{ search }}&category={{ category_filter }}&availability={{ availability_filter }}" class="page-btn {% if page_obj.number == num %}active{% endif %}">{{ num }}</a>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}&search={{ search }}&category={{ category_filter }}&availability={{ availability_filter }}" class="page-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"></path></svg>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                <h4>No books found</h4>
+                <p>{% if search or category_filter or availability_filter %}No books match your filters.{% else %}No books in the system yet.{% endif %}</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div><!-- end main-container -->
+
+    <!-- Batch Action Bar -->
+    <div class="batch-bar" id="batchBar">
+        <span class="batch-label" id="batchLabel">0 selected</span>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+            <label style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);">Add copies:</label>
+            <input type="number" id="bulkAmount" class="batch-amount-input" value="1" min="1" max="100">
+        </div>
+        <button type="button" class="btn btn-warning btn-sm" onclick="submitBulkStock()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            Add Stock
+        </button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="openBulkDeleteModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete Selected
+        </button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="clearSelection()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Clear
+        </button>
+    </div>
+
+    <!-- Single Delete Modal -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Delete Book
+            </div>
+            <div class="modal-body">
+                Are you sure you want to permanently delete <strong id="deleteBookTitle"></strong>? This will also remove all borrow records and reviews for this book.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeDeleteModal()">Cancel</button>
+                <form method="POST" id="deleteForm" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="bulk_delete">
+                    <input type="hidden" name="book_ids" id="deleteBookId">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Delete Modal -->
+    <div id="bulkDeleteModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                Delete Selected Books
+            </div>
+            <div class="modal-body">
+                Delete <strong id="bulkDeleteCount">0</strong> selected book(s)? Books with active borrows will be skipped. This cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline btn-sm" onclick="closeBulkDeleteModal()">Cancel</button>
+                <form method="POST" id="bulkDeleteForm" style="display:inline;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="bulk_delete">
+                    <div id="bulkDeleteIds"></div>
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden bulk stock form -->
+    <form method="POST" id="bulkStockForm" style="display:none;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="bulk_add_copies">
+        <input type="hidden" name="bulk_amount" id="bulkAmountHidden">
+        <div id="bulkStockIds"></div>
+    </form>
+
+    {% include 'includes/enhanced_nav_scripts.html' %}
+    {% include 'includes/back_button.html' %}
+
+    <script>
+        let selectedIds = new Set();
+
+        function onRowCheck() {
+            selectedIds.clear();
+            document.querySelectorAll('.row-cb:checked').forEach(cb => selectedIds.add(cb.value));
+            updateBatchBar();
+        }
+
+        function onSelectAllChange(masterCb) {
+            document.querySelectorAll('.row-cb').forEach(cb => {
+                cb.checked = masterCb.checked;
+                if (masterCb.checked) selectedIds.add(cb.value);
+                else selectedIds.delete(cb.value);
+            });
+            updateBatchBar();
+        }
+
+        function toggleSelectAll() {
+            const cbs = document.querySelectorAll('.row-cb');
+            const allChecked = [...cbs].every(cb => cb.checked);
+            cbs.forEach(cb => {
+                cb.checked = !allChecked;
+                if (!allChecked) selectedIds.add(cb.value);
+                else selectedIds.delete(cb.value);
+            });
+            const masterCb = document.getElementById('selectAllCb');
+            if (masterCb) masterCb.checked = !allChecked;
+            updateBatchBar();
+        }
+
+        function clearSelection() {
+            selectedIds.clear();
+            document.querySelectorAll('.row-cb').forEach(cb => cb.checked = false);
+            const masterCb = document.getElementById('selectAllCb');
+            if (masterCb) masterCb.checked = false;
+            updateBatchBar();
+        }
+
+        function updateBatchBar() {
+            const bar = document.getElementById('batchBar');
+            const label = document.getElementById('batchLabel');
+            const count = selectedIds.size;
+            if (count > 0) {
+                bar.classList.add('show');
+                label.textContent = count + ' selected';
+            } else {
+                bar.classList.remove('show');
+            }
+        }
+
+        // Single delete modal
+        function openDeleteModal(bookId, bookTitle) {
+            document.getElementById('deleteBookTitle').textContent = bookTitle;
+            document.getElementById('deleteBookId').value = bookId;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteModal();
+        });
+
+        // Bulk delete modal
+        function openBulkDeleteModal() {
+            if (selectedIds.size === 0) return;
+            document.getElementById('bulkDeleteCount').textContent = selectedIds.size;
+            const container = document.getElementById('bulkDeleteIds');
+            container.innerHTML = '';
+            selectedIds.forEach(id => {
+                const inp = document.createElement('input');
+                inp.type = 'hidden'; inp.name = 'book_ids'; inp.value = id;
+                container.appendChild(inp);
+            });
+            document.getElementById('bulkDeleteModal').classList.add('show');
+        }
+        function closeBulkDeleteModal() {
+            document.getElementById('bulkDeleteModal').classList.remove('show');
+        }
+        document.getElementById('bulkDeleteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeBulkDeleteModal();
+        });
+
+              // Bulk stock
+        function submitBulkStock() {
+            if (selectedIds.size === 0) return;
+            const amount = document.getElementById('bulkAmount').value;
+            document.getElementById('bulkAmountHidden').value = amount;
+            const container = document.getElementById('bulkStockIds');
+            container.innerHTML = '';
+            selectedIds.forEach(id => {
+                const inp = document.createElement('input');
+                inp.type = 'hidden'; inp.name = 'book_ids'; inp.value = id;
+                container.appendChild(inp);
+            });
+            document.getElementById('bulkStockForm').submit();
+        }
+
+        // Show pending toast after reload
+        document.addEventListener('DOMContentLoaded', function() {
+            const pending = sessionStorage.getItem('pendingToast');
+            if (pending) {
+                sessionStorage.removeItem('pendingToast');
+                try {
+                    const { message, type } = JSON.parse(pending);
+                    if (typeof showToast === 'function') showToast(message, type);
+                } catch(e) {}
+            }
+        });
+    </script>
+</body>
+</html>

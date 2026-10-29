@@ -1,0 +1,53 @@
+Hi {{ user.get_full_name|default:user.username }},
+
+🎉 Welcome to {{ site_name }}! 🎉
+
+Thank you for verifying your email and joining our library community!
+
+YOUR ACCOUNT IS NOW ACTIVE:
+----------------------------
+Username: {{ user.username }}
+Email: {{ user.email }}
+Role: {{ user.get_role_display }}
+
+WHAT YOU CAN DO NOW:
+--------------------
+✓ Browse our extensive book collection
+✓ Request books for borrowing
+✓ Read books online (digital library)
+✓ Track your borrowed books and due dates
+✓ Manage your reading history
+✓ Receive notifications about your books
+
+GETTING STARTED:
+----------------
+1. Login to your account at {{ site_url }}
+2. Browse available books in the catalog
+3. Request books you want to read
+4. Wait for librarian approval
+5. Start reading online!
+
+BORROWING LIMITS:
+-----------------
+- Maximum books you can borrow: {{ user.profile.max_books_allowed }}
+- Loan period: {{ max_borrow_days }} days per book
+- Late return fine: ETB {{ fine_per_day }} per day
+
+IMPORTANT REMINDERS:
+--------------------
+- Return books on time via the website to avoid fines
+- Check your email regularly for notifications
+- You'll receive reminders when books are due
+- Pay fines online using Stripe or Chapa
+
+NEED HELP?
+----------
+If you have any questions, visit us at {{ site_url }} or contact our support team.
+
+We're excited to have you as part of our reading community!
+
+Happy reading! 📚
+
+Best regards,
+{{ site_name }} Team
+{{ site_url }}

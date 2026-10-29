@@ -1,0 +1,27 @@
+﻿================================================================================
+BOOK REQUEST REJECTED - {{ site_name }}
+================================================================================
+
+Hello {{ user.get_full_name|default:user.username }},
+
+We regret to inform you that your book request has been rejected.
+
+BOOK DETAILS:
+Title: {{ book.title }}
+Author: {{ book.author }}
+Category: {{ book.category.name|default:'N/A' }}
+
+REJECTION REASON:
+{{ reason|default:'No specific reason provided.' }}
+
+WHAT YOU CAN DO:
+- Browse other available books: {{ site_url }}/books/
+- Submit a new request for a different book
+- Contact us at {{ site_url }} for more information
+
+Browse books: {{ site_url }}/books/
+
+Best regards,
+{{ site_name }} Team
+
+================================================================================
