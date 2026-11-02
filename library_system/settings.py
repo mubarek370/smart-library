@@ -177,7 +177,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.User'
 
 # Site ID for django.contrib.sites
-SITE_ID = 2
+SITE_ID = config('SITE_ID', default=2, cast=int)
 
 # Library System Settings
 MAX_BORROW_LIMIT = 5

@@ -44,8 +44,11 @@ venv.bak/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-# Media files (local storage)
-/media
+# Media files (ignore dynamic user uploads, preserve seed book covers, PDFs & QR codes)
+/media/*
+!/media/covers/
+!/media/qr_codes/
+!/media/pdfs/
 /staticfiles
 # Keep static source files - needed for collectstatic
 # /static
@@ -123,8 +126,8 @@ db.sqlite3
 db.sqlite3-journal
 *.db
 
-# Local media uploads
-/media/
+# Local media uploads (handled above)
+# /media/
 
 # Local static files collected
 /staticfiles/
