@@ -42,6 +42,9 @@ def custom_500(request):
     text_content = render_to_string('emails/server_error_alert.txt', ctx)
     html_content = render_to_string('emails/server_error_alert.html', ctx)
 
+    # Log error traceback to stdout for Render logs
+    print(f"\n==================== [500 SERVER ERROR] ====================\nURL: {request_url} ({request_method})\nUser: {user_info}\nError: {error_type}: {error_message}\nTraceback:\n{error_traceback}\n============================================================\n", flush=True)
+
     try:
         admin_emails = [email for name, email in settings.ADMINS]
         if admin_emails:

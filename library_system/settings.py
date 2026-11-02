@@ -27,16 +27,16 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-2+c#eb_7bx7apya(kbxrf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-_allowed = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+_allowed = [h.strip() for h in config('ALLOWED_HOSTS', default='localhost,127.0.0.1,.onrender.com').split(',') if h.strip()]
 if '.onrender.com' not in _allowed:
     _allowed.append('.onrender.com')
 ALLOWED_HOSTS = _allowed
 
 # CSRF Trusted Origins for local development and Render production
-CSRF_TRUSTED_ORIGINS = config(
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in config(
     'CSRF_TRUSTED_ORIGINS',
     default='https://*.onrender.com,http://localhost:8000,http://127.0.0.1:8000,http://localhost:8080,http://127.0.0.1:8080'
-).split(',')
+).split(',') if o.strip()]
 
 # Security header for SSL behind Render reverse proxy
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -121,9 +121,15 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD', default=''),
         'HOST': config('DB_HOST', default=''),
         'PORT': config('DB_PORT', default=''),
-        'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', default=600, cast=int),
+        'CONN_MAX_AGE': config('DB_CONN_MAX_AGE', default=0, cast=int),
     }
 }
+
+# Supabase PostgreSQL requires SSL and zero persistent connections for transaction poolers
+if 'postgresql' in str(DATABASES['default']['ENGINE']):
+    DATABASES['default']['OPTIONS'] = {
+        'sslmode': config('DB_SSLMODE', default='require'),
+    }
 
 # In-memory cache to prevent redundant database hits across page views
 CACHES = {
