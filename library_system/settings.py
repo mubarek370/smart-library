@@ -217,6 +217,7 @@ STORAGES = {
         'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
+WHITENOISE_USE_FINDERS = True
 
 MEDIA_ROOT = BASE_DIR / 'media'
 MEDIA_URL = '/media/'

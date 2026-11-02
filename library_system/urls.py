@@ -30,12 +30,13 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),  # Add allauth URLs
 ]
 
-# Serve media files (both in development and on Render)
+# Serve media and static files (both in development and on Render)
 from django.views.static import serve
 from django.urls import re_path
 
 urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
 ]
 
 # Custom error handlers
